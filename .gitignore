@@ -1,0 +1,49 @@
+# macOS system files
+.DS_Store
+
+# Xcode project files
+# Keep the main project (*.xcodeproj/*.pbxproj) but ignore user-specific settings
+*.xcworkspace
+!default.xcworkspace
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcuserdata/*
+*.xcodeproj/xcuserdata/
+*.xcodeproj/xcuserdata/*
+*.xcodeproj/project.xcuserstate
+*.xcscmblueprint
+*.xcsettings
+
+# Build artifacts (whether they appear at the root or inside subfolders)
+build/
+DerivedData/
+# If Xcode places build folders inside your subfolder:
+TrailTrails/build/
+TrailTrails/DerivedData/
+
+# Swift Package Manager
+.build/
+Packages/
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+
+# Archives and debug symbols
+*.xcarchive
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Playground
+timeline.xctimeline
+playground.xcworkspace
+
+# Other temporary files
+*.swp
