@@ -7,7 +7,7 @@
 import CoreLocation
 
 struct LocationService {
-    static func randomCoordinate(near coordinate: CLLocationCoordinate2D, maxDistance km: Double) -> CLLocationCoordinate2D {
+    static func randomCoordinate(near coordinate: CLLocationCoordinate2D, maxDistance km: Double) -> (Double, Double) {
         // Earth's radius in kilometers
         let earthRadius = 6371.0
         
@@ -36,7 +36,6 @@ struct LocationService {
         // Convert the new latitude and longitude from radians back to degrees.
         let newLatitude = lat2 * 180 / .pi
         let newLongitude = lon2 * 180 / .pi
-        
-        return CLLocationCoordinate2D(latitude: newLatitude, longitude: newLongitude)
+        return (newLatitude, newLongitude)
     }
 }
