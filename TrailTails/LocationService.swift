@@ -39,3 +39,38 @@ struct LocationService {
         return (newLatitude, newLongitude)
     }
 }
+
+class LocationManager:NSObject, ObservableObject, CLLocationManagerDelegate {
+    private let locationManager = CLLocationManager()
+    @Published var isLocationAuthDenied = false
+    @Published var location: CLLocation?
+    override init() {
+        super.init()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+    }
+    
+    func requestLocation() {
+        if locationManager.authorizationStatus == .notDetermined {
+            isLocationAuthDenied = false
+            locationManager.requestWhenInUseAuthorization()
+        } else if locationManager.authorizationStatus == .authorizedWhenInUse {
+            isLocationAuthDenied = false
+            locationManager.requestLocation()
+        } else {
+            isLocationAuthDenied = true
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        location = locations.first
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        requestLocation()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
+        print(error.localizedDescription)
+    }
+}
