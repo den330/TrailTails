@@ -13,6 +13,7 @@ struct TrailTailsApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .modelContainer(for: Tail.self)
         }
     }
 }

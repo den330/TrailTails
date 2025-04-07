@@ -6,14 +6,22 @@
 //
 import SwiftData
 import Foundation
+import MapKit
 
 @Model
-final class Tail {
-    var id: UUID = UUID()
+final class Tail: Decodable {
+    @Attribute(.unique) var id: String
     var title: String
     var content: String
-    init(title: String, content: String) {
-        self.title = title
-        self.content = content
+    enum CodingKeys: CodingKey {
+        case id
+        case title
+        case content
+    }
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        content = try container.decode(String.self, forKey: .content)
     }
 }
