@@ -20,22 +20,11 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		90071B1B2DA3088B00DCAA3E /* Exceptions for "TrailTails" folder in "Compile Sources" phase from "TrailTails" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 90071AF32DA2205700DCAA3E /* Sources */;
-			membershipExceptions = (
-				Tail.json,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		90071AF92DA2205700DCAA3E /* TrailTails */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				90071B082DA229B200DCAA3E /* Exceptions for "TrailTails" folder in "TrailTails" target */,
-				90071B1B2DA3088B00DCAA3E /* Exceptions for "TrailTails" folder in "Compile Sources" phase from "TrailTails" target */,
 			);
 			path = TrailTails;
 			sourceTree = "<group>";

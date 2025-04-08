@@ -16,6 +16,7 @@ struct HomeView: View {
     }
 }
 
-//#Preview {
-//    HomeView()
-//}
+#Preview {
+    @Previewable @State var showMap = false
+    HomeView(showMap: $showMap)
+}

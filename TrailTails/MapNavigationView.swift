@@ -16,25 +16,28 @@ struct MapNavigationView: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         NavigationStack {
-            MapView(path: $path, tailSelected: $tailSelected)
-                .navigationTitle("Map")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Back") {
-                            dismiss()
-                        }
-                    }
-                }
-                .navigationDestination(isPresented: Binding(
-                    get: { tailSelected != nil },
-                    set: {if !$0 {tailSelected = nil}}
-                )) {
-                    if let tailSelected = tailSelected {
-                        StoryDetailView(storyId: tailSelected.id)
-                    }
-                }
+            MapView()
         }
+//        NavigationStack {
+//            MapView(path: $path, tailSelected: $tailSelected)
+//                .navigationTitle("Map")
+//                .navigationBarTitleDisplayMode(.inline)
+//                .toolbar {
+//                    ToolbarItem(placement: .cancellationAction) {
+//                        Button("Back") {
+//                            dismiss()
+//                        }
+//                    }
+//                }
+//                .navigationDestination(isPresented: Binding(
+//                    get: { tailSelected != nil },
+//                    set: {if !$0 {tailSelected = nil}}
+//                )) {
+//                    if let tailSelected = tailSelected {
+//                        StoryDetailView(storyId: tailSelected.id)
+//                    }
+//                }
+//        }
     }
 }
 

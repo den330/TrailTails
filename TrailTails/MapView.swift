@@ -11,62 +11,38 @@ import SwiftData
 
 struct MapView: View {
     @Environment(\.modelContext) private var context
-    
     @Query private var tails: [Tail]
-    @State private var userRegion: MapCameraPosition = .region(MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)))
-    @State private var isLocationAuthDenied = false
-    @Binding var path: NavigationPath
-    @Binding var tailSelected: Tail?
-    @StateObject private var locationManager = LocationManager()
+    @StateObject private var locationManager: LocationManager = LocationManager()
+    @State private var cameraPosition: MapCameraPosition?
     var body: some View {
-        Map(initialPosition: userRegion) {
-            ForEach(tails) { tail in
-                if tail.latitude != nil && tail.longitude != nil {
-                    let newCoord = CLLocationCoordinate2D(latitude: tail.latitude!, longitude: tail.longitude!)
-                    Annotation(tail.title, coordinate: newCoord) {
-                        Button {
-                            tailSelected = tail
-                        } label: {
-                            VStack {
+        Group {
+            if cameraPosition != nil {
+                let cameraBinding = Binding(get: {self.cameraPosition!}, set: {self.cameraPosition = $0})
+                Map(position: cameraBinding) {
+                    UserAnnotation()
+                    if let userCoord = locationManager.location?.coordinate {
+                        ForEach(tails, id:\.self) { tail in
+                            let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance: 5)
+                            Annotation("\(tail.title)", coordinate: CLLocationCoordinate2D(latitude: lat, longitude: longi)) {
                                 Image(systemName: "mappin.circle.fill")
-                                    .font(.title)
-                                    .foregroundColor(.blue)
+                                    .foregroundStyle(.red)
+                                    .font(.title) // Adjust size as needed
+//                                Text("Lat is \(lat), longi is \(longi)")
                             }
-                            .padding(5)
-                            .background(Color.white.opacity(0.8))
-                            .cornerRadius(8)
                         }
                     }
                 }
-            }
-        }.onChange(of: locationManager.location) { _, newValue in
-            if let newPositon = newValue {
-                userRegion = .region(MKCoordinateRegion(center: newPositon.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)))
-                for tail in tails {
-                    if tail.latitude == nil || tail.longitude == nil {
-                        let (newLatitude, newLongitude) = LocationService.randomCoordinate(near: userRegion.camera!.centerCoordinate, maxDistance: 2)
-                        tail.latitude = newLatitude
-                        tail.longitude = newLongitude
-                        try! context.save()
-                    }
-                }
+                .scaledToFill()
+                .ignoresSafeArea()
+            } else {
+                ProgressView()
             }
         }
-        .onChange(of: locationManager.isLocationAuthDenied) { _, newValue in
-            isLocationAuthDenied = newValue
-        }
-        .alert("Location Access Denied", isPresented: $isLocationAuthDenied) {
-            Button("Cancel", role: .cancel) { }
-            Button("Open Settings") {
-                if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(settingsURL)
-                }
+        .onChange(of: locationManager.location) {
+            guard let userCoord = locationManager.location?.coordinate else {
+                return
             }
-        } message: {
-            Text("Please enable location access in Settings to see nearby stories.")
-        }
-        .onAppear {
-            locationManager.requestLocation()
+            cameraPosition = MapCameraPosition.camera(.init(centerCoordinate: userCoord, distance: 20000))
         }
     }
 }
