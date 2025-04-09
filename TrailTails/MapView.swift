@@ -20,19 +20,16 @@ struct MapView: View {
                 let cameraBinding = Binding(get: {self.cameraPosition!}, set: {self.cameraPosition = $0})
                 Map(position: cameraBinding) {
                     UserAnnotation()
-                    if let userCoord = locationManager.location?.coordinate {
-                        ForEach(tails, id:\.self) { tail in
-                            let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance: 5)
+                    ForEach(tails, id:\.self) { tail in
+                        if let lat = tail.latitude, let longi = tail.longitude {
                             Annotation("\(tail.title)", coordinate: CLLocationCoordinate2D(latitude: lat, longitude: longi)) {
                                 Image(systemName: "mappin.circle.fill")
                                     .foregroundStyle(.red)
-                                    .font(.title) // Adjust size as needed
-//                                Text("Lat is \(lat), longi is \(longi)")
+                                    .font(.title)
                             }
                         }
                     }
                 }
-                .scaledToFill()
                 .ignoresSafeArea()
             } else {
                 ProgressView()
@@ -42,7 +39,19 @@ struct MapView: View {
             guard let userCoord = locationManager.location?.coordinate else {
                 return
             }
-            cameraPosition = MapCameraPosition.camera(.init(centerCoordinate: userCoord, distance: 20000))
+            for tail in tails {
+                if tail.latitude == nil {
+                    let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance: 5)
+                    tail.latitude = lat
+                    tail.longitude = longi
+                    do {
+                        try context.save()
+                    } catch {
+                        print("Tail coord save fail \(error)")
+                    }
+                }
+            }
+            cameraPosition = MapCameraPosition.camera(.init(centerCoordinate: userCoord, distance: 2000))
         }
     }
 }
