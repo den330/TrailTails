@@ -59,6 +59,14 @@ class LocationManager:NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
     
+    func stopUpdatingLocation() {
+        locationManager.stopUpdatingLocation()
+    }
+    
+    func startUpdatingLocation() {
+        locationManager.startUpdatingLocation()
+    }
+    
     override init() {
         super.init()
         locationManager.delegate = self
@@ -69,13 +77,14 @@ class LocationManager:NSObject, ObservableObject, CLLocationManagerDelegate {
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         location = locations.first
-        print("location is \(location)")
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         updateLocationAuth(manager: manager)
         if manager.authorizationStatus == .authorizedWhenInUse {
-            manager.requestLocation()
+            manager.startUpdatingLocation()
+        } else {
+            manager.stopUpdatingLocation()
         }
     }
     

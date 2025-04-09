@@ -20,13 +20,12 @@ struct ContentView: View {
             }
             .onAppear {
                 Task {
-                    if tails.count == 0 {
-                        let fetchedTails = try await NetworkService.fetchTails()
-                        for tail in fetchedTails {
-                            context.insert(tail)
-                        }
-                        try context.save()
+                    let currentList = tails.map {$0.id}
+                    let fetchedTails = try await NetworkService.fetchTails(idList: Tail.randomIdGenerator(currentList: currentList))
+                    for tail in fetchedTails {
+                        context.insert(tail)
                     }
+                    try context.save()
                 }
             }
     }

@@ -6,13 +6,17 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct StoryDetailView: View {
-    let storyId: String
+    @Query private var tails: [Tail]
+    let storyId: Int
     var body: some View {
         VStack {
             Text("Story ID: \(storyId)")
-            Text("This is where the story details go!")
+            if let summary = tails.filter ({$0.id == storyId}).first?.summaries.first {
+                Text(summary)
+            }
         }
         .navigationTitle("Story Details")
     }
