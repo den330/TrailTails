@@ -16,7 +16,7 @@ struct MapView: View {
     @StateObject private var locationManager: LocationManager = LocationManager()
     @State private var cameraPosition: MapCameraPosition?
     @State private var showLocationDeniedAlert: Bool = false
-    @State private var tailToPop: Int?
+    @State private var tailToPop = Set<Int>()
     @Binding var path: NavigationPath
 
     var body: some View {
@@ -43,11 +43,9 @@ struct MapView: View {
                             if let lat = tail.latitude, let longi = tail.longitude {
                                 Annotation("\(tail.title)", coordinate: CLLocationCoordinate2D(latitude: lat, longitude: longi)) {
                                     VStack(spacing: 4) {
-                                        if let tailToPop = tailToPop, tailToPop == tail.id {
+                                        if tailToPop.contains(tail.id) {
                                             Button {
                                                 path.append(tail.id)
-                                                self.tailToPop = nil
-                                                locationManager.startUpdatingLocation()
                                             } label: {
                                                 Text("Open this story")
                                                     .font(.caption)
@@ -87,20 +85,20 @@ struct MapView: View {
                             }
                         }
                     }
+                    cameraPosition = MapCameraPosition.camera(.init(centerCoordinate: userCoord, distance: 2000))
                     startingSpotDetermined = true
                 } else {
                     for tail in tails {
                         if let lat = tail.latitude, let longi = tail.longitude {
                             let tailLocation = CLLocation(latitude: lat, longitude: longi)
-                            if tailLocation.distance(from: CLLocation(latitude: userCoord.latitude, longitude: userCoord.longitude)) < 50 {
-                                tailToPop = tail.id
-                                locationManager.stopUpdatingLocation()
-                                break
+                            if tailLocation.distance(from: CLLocation(latitude: userCoord.latitude, longitude: userCoord.longitude)) < 5000 {
+                                tailToPop.insert(tail.id)
+                            } else {
+                                tailToPop.remove(tail.id)
                             }
                         }
                     }
                 }
-                cameraPosition = MapCameraPosition.camera(.init(centerCoordinate: userCoord, distance: 2000))
             }
         }
         .onChange(of: locationManager.locationAuthStatus) {
@@ -112,9 +110,6 @@ struct MapView: View {
                     break
                 }
             }
-        }
-        .onAppear {
-            locationManager.startUpdatingLocation()
         }
         .alert("Location Access Denied", isPresented: $showLocationDeniedAlert) {
             Button("Cancel", role: .cancel) {}

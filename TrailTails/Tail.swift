@@ -1,12 +1,4 @@
-//
-//  Tail.swift
-//  TrailTails
-//
-//  Created by yaxin on 2025-04-06.
-//
 import SwiftData
-import Foundation
-import MapKit
 
 @Model
 final class Tail: Decodable {
@@ -15,17 +7,20 @@ final class Tail: Decodable {
     var summaries: [String]
     var latitude: Double?
     var longitude: Double?
+    
+    
     enum CodingKeys: CodingKey {
         case id
         case title
         case summaries
+        case results // Add this for the outer dictionary key
     }
     
-    init(from decoder: any Decoder) throws {
+    required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(Int.self, forKey: .id)
-        title = try container.decode(String.self, forKey: .title)
-        summaries = try container.decode([String].self, forKey: .summaries)
+        self.id = try container.decode(Int.self, forKey: .id)
+        self.title = try container.decode(String.self, forKey: .title)
+        self.summaries = try container.decode([String].self, forKey: .summaries)
     }
     
     static func randomIdGenerator(currentList: [Int]) -> [Int] {
@@ -43,4 +38,9 @@ final class Tail: Decodable {
         }
         return res
     }
+}
+
+
+class TailList: Decodable {
+    var results: [Tail]
 }
