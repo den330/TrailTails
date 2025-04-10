@@ -18,16 +18,6 @@ struct ContentView: View {
             .fullScreenCover(isPresented: $showMap) {
                 MapNavigationView()
             }
-            .onAppear {
-                Task {
-                    let currentList = tails.map {$0.id}
-                    let fetchedTails = try await NetworkService.fetchTails(idList: Tail.randomIdGenerator(currentList: currentList))
-                    for tail in fetchedTails {
-                        context.insert(tail)
-                    }
-                    try context.save()
-                }
-            }
     }
 }
 
