@@ -26,7 +26,7 @@ struct MapNavigationView: View {
                     }
                 }
                 .navigationDestination(for: Int.self) { storyId in
-                    StoryDetailView(storyId: storyId)
+                    StoryDetailView(path: $path, storyId: storyId)
                 }
         }
     }

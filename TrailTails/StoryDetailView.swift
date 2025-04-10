@@ -10,6 +10,7 @@ import SwiftData
 
 struct StoryDetailView: View {
     @Query private var tails: [Tail]
+    @Binding var path: NavigationPath
     let storyId: Int
     var body: some View {
         VStack {
@@ -19,6 +20,16 @@ struct StoryDetailView: View {
             }
         }
         .navigationTitle("Story Details")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    path.removeLast()
+                } label: {
+                    Text("Back")
+                }
+            }
+        }
     }
 }
 
