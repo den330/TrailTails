@@ -10,7 +10,7 @@ import SwiftData
 
 struct StoryDetailView: View {
     @Query private var tails: [Tail]
-    @Binding var path: NavigationPath
+    @Binding var path: [Int]
     let storyId: Int
     var body: some View {
         VStack {

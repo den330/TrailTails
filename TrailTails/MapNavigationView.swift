@@ -7,15 +7,19 @@
 
 import SwiftUI
 import MapKit
+import Foundation
 
 struct MapNavigationView: View {
-    @State private var path = NavigationPath()
+    @State private var path: [Int] = []
     @Environment(\.modelContext) private var context
     
     @Environment(\.dismiss) private var dismiss
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             MapView(path: $path)
+                .navigationDestination(for: Int.self) { storyId in
+                    StoryDetailView(path: $path, storyId: storyId)
+                }
                 .navigationTitle("Map")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -25,9 +29,9 @@ struct MapNavigationView: View {
                         }
                     }
                 }
-                .navigationDestination(for: Int.self) { storyId in
-                    StoryDetailView(path: $path, storyId: storyId)
-                }
+        }
+        .onAppear {
+            path.append(3)
         }
     }
 }

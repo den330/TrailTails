@@ -17,7 +17,7 @@ struct MapView: View {
     @State private var cameraPosition: MapCameraPosition?
     @State private var showLocationDeniedAlert: Bool = false
     @State private var tailToPop = Set<Int>()
-    @Binding var path: NavigationPath
+    @Binding var path: [Int]
 
     var body: some View {
         Group {
@@ -44,8 +44,13 @@ struct MapView: View {
                                 Annotation("\(tail.title)", coordinate: CLLocationCoordinate2D(latitude: lat, longitude: longi)) {
                                     VStack(spacing: 4) {
                                         if tailToPop.contains(tail.id) {
+                                            NavigationLink("Select \(tail.id)", value: tail.id)
+
+
                                             Button {
-                                                path.append(tail.id)
+                                                print("before: \(path.count)")
+                                                path.append(Int(tail.id))
+                                                print("after: \(path.count)")
                                             } label: {
                                                 Text("Open this story")
                                                     .font(.caption)

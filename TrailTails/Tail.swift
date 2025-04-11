@@ -1,26 +1,20 @@
 import SwiftData
+import Foundation
 
 @Model
-final class Tail: Decodable {
+final class Tail {
     @Attribute(.unique) var id: Int
     var title: String
-    var summaries: [String]
+    var summaries: [Summary]
     var latitude: Double?
     var longitude: Double?
     
-    
-    enum CodingKeys: CodingKey {
-        case id
-        case title
-        case summaries
-        case results // Add this for the outer dictionary key
-    }
-    
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(Int.self, forKey: .id)
-        self.title = try container.decode(String.self, forKey: .title)
-        self.summaries = try container.decode([String].self, forKey: .summaries)
+    init(id: Int, title: String, summaries: [Summary], latitude: Double? = nil, longitude: Double? = nil) {
+        self.id = id
+        self.title = title
+        self.summaries = summaries
+        self.latitude = latitude
+        self.longitude = longitude
     }
     
     static func randomIdGenerator(currentList: [Int]) -> [Int] {
@@ -40,7 +34,27 @@ final class Tail: Decodable {
     }
 }
 
+extension Tail {
+    static func fromDTO(_ dto: TailDTO) -> Tail {
+        let summaryModels = dto.summaries.map { Summary(text: $0) }
+        return Tail(id: dto.id, title: dto.title, summaries: summaryModels)
+    }
+}
 
-class TailList: Decodable {
-    var results: [Tail]
+@Model
+class Summary {
+    var text: String
+    init(text: String) {
+        self.text = text
+    }
+}
+
+struct TailDTO: Decodable {
+    let id: Int
+    let title: String
+    let summaries: [String]
+}
+
+struct TailListDTO: Decodable {
+    var results: [TailDTO]
 }
