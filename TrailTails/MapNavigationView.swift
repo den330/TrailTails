@@ -30,9 +30,6 @@ struct MapNavigationView: View {
                     }
                 }
         }
-        .onAppear {
-            path.append(3)
-        }
     }
 }
 

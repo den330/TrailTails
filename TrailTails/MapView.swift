@@ -26,6 +26,13 @@ struct MapView: View {
                 VStack{
                     Button {
                         Task {
+                            self.cameraPosition = nil
+                            if tails.count >= 15 {
+                                for tail in tails {
+                                    context.delete(tail)
+                                }
+                                try context.save()
+                            }
                             let currentList = tails.map {$0.id}
                             let fetchedTails = try await NetworkService.fetchTails(idList: Tail.randomIdGenerator(currentList: currentList))
                             for tail in fetchedTails {
@@ -44,9 +51,6 @@ struct MapView: View {
                                 Annotation("\(tail.title)", coordinate: CLLocationCoordinate2D(latitude: lat, longitude: longi)) {
                                     VStack(spacing: 4) {
                                         if tailToPop.contains(tail.id) {
-                                            NavigationLink("Select \(tail.id)", value: tail.id)
-
-
                                             Button {
                                                 print("before: \(path.count)")
                                                 path.append(Int(tail.id))
@@ -80,7 +84,7 @@ struct MapView: View {
                 if !startingSpotDetermined {
                     for tail in tails {
                         if tail.latitude == nil {
-                            let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance: 5)
+                            let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance: 2)
                             tail.latitude = lat
                             tail.longitude = longi
                             do {
@@ -96,7 +100,7 @@ struct MapView: View {
                     for tail in tails {
                         if let lat = tail.latitude, let longi = tail.longitude {
                             let tailLocation = CLLocation(latitude: lat, longitude: longi)
-                            if tailLocation.distance(from: CLLocation(latitude: userCoord.latitude, longitude: userCoord.longitude)) < 5000 {
+                            if tailLocation.distance(from: CLLocation(latitude: userCoord.latitude, longitude: userCoord.longitude)) < 300 {
                                 tailToPop.insert(tail.id)
                             } else {
                                 tailToPop.remove(tail.id)
@@ -107,6 +111,16 @@ struct MapView: View {
             }
         }
         .onChange(of: locationManager.locationAuthStatus) {
+            if let auth = locationManager.locationAuthStatus {
+                switch auth {
+                case .denied:
+                    showLocationDeniedAlert = true
+                default:
+                    break
+                }
+            }
+        }
+        .onAppear {
             if let auth = locationManager.locationAuthStatus {
                 switch auth {
                 case .denied:

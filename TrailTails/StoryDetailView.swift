@@ -16,7 +16,7 @@ struct StoryDetailView: View {
         VStack {
             Text("Story ID: \(storyId)")
             if let summary = tails.filter ({$0.id == storyId}).first?.summaries.first {
-                Text(summary)
+                Text(summary.text)
             }
         }
         .navigationTitle("Story Details")
