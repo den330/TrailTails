@@ -96,7 +96,7 @@ struct MapView: View {
                 if !startingSpotDetermined {
                     for tail in tails {
                         if tail.latitude == nil {
-                            let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance: 2)
+                            let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance: 0.5)
                             tail.latitude = lat
                             tail.longitude = longi
                             do {
@@ -140,7 +140,3 @@ struct MapView: View {
         }
     }
 }
-
-//#Preview {
-//    MapView()
-//}
