@@ -18,6 +18,17 @@ struct MapView: View {
     @State private var showLocationDeniedAlert: Bool = false
     @State private var tailToPop = Set<Int>()
     @Binding var path: [Int]
+    
+    private func detectAuthAndShowAlert(auth: LocationManager.LocationAuthStatus?) {
+        if let auth = locationManager.locationAuthStatus {
+            switch auth {
+            case .denied:
+                showLocationDeniedAlert = true
+            default:
+                break
+            }
+        }
+    }
 
     var body: some View {
         Group {
@@ -26,6 +37,7 @@ struct MapView: View {
                 VStack{
                     Button {
                         Task {
+                            self.detectAuthAndShowAlert(auth: locationManager.locationAuthStatus)
                             self.cameraPosition = nil
                             if tails.count >= 15 {
                                 for tail in tails {
@@ -111,24 +123,10 @@ struct MapView: View {
             }
         }
         .onChange(of: locationManager.locationAuthStatus) {
-            if let auth = locationManager.locationAuthStatus {
-                switch auth {
-                case .denied:
-                    showLocationDeniedAlert = true
-                default:
-                    break
-                }
-            }
+            self.detectAuthAndShowAlert(auth: locationManager.locationAuthStatus)
         }
         .onAppear {
-            if let auth = locationManager.locationAuthStatus {
-                switch auth {
-                case .denied:
-                    showLocationDeniedAlert = true
-                default:
-                    break
-                }
-            }
+            self.detectAuthAndShowAlert(auth: locationManager.locationAuthStatus)
         }
         .alert("Location Access Denied", isPresented: $showLocationDeniedAlert) {
             Button("Cancel", role: .cancel) {}
