@@ -8,6 +8,7 @@ final class Tail {
     var summaries: [Summary]
     var latitude: Double?
     var longitude: Double?
+    var visited: Bool = false
     
     init(id: Int, title: String, summaries: [Summary], latitude: Double? = nil, longitude: Double? = nil) {
         self.id = id

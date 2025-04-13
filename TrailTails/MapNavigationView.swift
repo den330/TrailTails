@@ -10,7 +10,7 @@ import MapKit
 import Foundation
 
 struct MapNavigationView: View {
-    @State private var path: [Int] = []
+    @State private var path = NavigationPath()
     @Environment(\.modelContext) private var context
     
     @Environment(\.dismiss) private var dismiss

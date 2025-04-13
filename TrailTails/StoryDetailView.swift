@@ -11,14 +11,27 @@ import SwiftData
 struct StoryDetailView: View {
     @Environment(\.modelContext) private var context
     @Query private var tails: [Tail]
-    @Binding var path: [Int]
+    @Binding var path: NavigationPath
     let storyId: Int
     var body: some View {
-        VStack {
-            Text("Story ID: \(storyId)")
-            if let summary = tails.filter ({$0.id == storyId}).first?.summaries.first {
-                Text(summary.text)
+        ScrollView {
+            if let tail = tails.filter ({$0.id == storyId}).first {
+                Text(tail.title)
+                    .font(.largeTitle)
             }
+            if let summary = tails.filter ({$0.id == storyId}).first?.summaries.first {
+                Spacer(minLength: 10)
+                Text(summary.text)
+                    .font(.body)
+            }
+        }
+        .padding(20)
+        .background {
+            Image("basketball")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+            Color.black.opacity(0.5).edgesIgnoringSafeArea(.all)
         }
         .navigationBarBackButtonHidden(true)
         .navigationTitle("Story Details")
@@ -27,8 +40,7 @@ struct StoryDetailView: View {
             ToolbarItem(placement: .cancellationAction) {
                 Button {
                     if let tail = tails.filter ({$0.id == storyId}).first {
-                        context.delete(tail)
-                        print("tail deleted")
+                        tail.visited = true
                         do {
                             try context.save()
                         } catch {
@@ -43,7 +55,3 @@ struct StoryDetailView: View {
         }
     }
 }
-
-//#Preview {
-//    StoryDetailView()
-//}

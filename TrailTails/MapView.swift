@@ -17,7 +17,7 @@ struct MapView: View {
     @State private var cameraPosition: MapCameraPosition?
     @State private var showLocationDeniedAlert: Bool = false
     @State private var tailToPop = Set<Int>()
-    @Binding var path: [Int]
+    @Binding var path: NavigationPath
     
     private func detectAuthAndShowAlert(auth: LocationManager.LocationAuthStatus?) {
         if let auth = locationManager.locationAuthStatus {
@@ -34,32 +34,11 @@ struct MapView: View {
         Group {
             if cameraPosition != nil {
                 let cameraBinding = Binding(get: {self.cameraPosition!}, set: {self.cameraPosition = $0})
-                VStack{
-                    Button {
-                        Task {
-                            self.detectAuthAndShowAlert(auth: locationManager.locationAuthStatus)
-                            self.cameraPosition = nil
-                            if tails.count >= 15 {
-                                for tail in tails {
-                                    context.delete(tail)
-                                }
-                                try context.save()
-                            }
-                            let currentList = tails.map {$0.id}
-                            let fetchedTails = try await NetworkService.fetchTails(idList: Tail.randomIdGenerator(currentList: currentList))
-                            for tail in fetchedTails {
-                                context.insert(tail)
-                            }
-                            try context.save()
-                            self.startingSpotDetermined = false
-                        }
-                    } label: {
-                        Text("Get some tails")
-                    }
+                ZStack(alignment: .topLeading){
                     Map(position: cameraBinding) {
                         UserAnnotation()
                         ForEach(tails, id:\.self) { tail in
-                            if let lat = tail.latitude, let longi = tail.longitude {
+                            if let lat = tail.latitude, let longi = tail.longitude, !tail.visited {
                                 Annotation("\(tail.title)", coordinate: CLLocationCoordinate2D(latitude: lat, longitude: longi)) {
                                     VStack(spacing: 4) {
                                         if tailToPop.contains(tail.id) {
@@ -85,7 +64,33 @@ struct MapView: View {
                             }
                         }
                     }
-                    .ignoresSafeArea()
+                    Button {
+                        Task {
+                            self.detectAuthAndShowAlert(auth: locationManager.locationAuthStatus)
+                            self.cameraPosition = nil
+                            if tails.filter({$0.visited == false}).count >= 15 {
+                                for tail in tails {
+                                    if !tail.visited {
+                                        context.delete(tail)
+                                    }
+                                }
+                                try context.save()
+                            }
+                            let currentList = tails.map {$0.id}
+                            let fetchedTails = try await NetworkService.fetchTails(idList: Tail.randomIdGenerator(currentList: currentList))
+                            for tail in fetchedTails {
+                                context.insert(tail)
+                            }
+                            try context.save()
+                            self.startingSpotDetermined = false
+                        }
+                    } label: {
+                        Text("Get some tails")
+                            .padding(EdgeInsets(top: 5, leading: 10, bottom: 5, trailing: 10))
+                            .background(.yellow)
+                            .clipShape(.rect(cornerRadius: 80))
+                    }
+                    .padding([.top, .leading], 10)
                 }
             } else {
                 ProgressView()
@@ -96,7 +101,7 @@ struct MapView: View {
                 if !startingSpotDetermined {
                     for tail in tails {
                         if tail.latitude == nil {
-                            let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance: 0.5)
+                            let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance:1)
                             tail.latitude = lat
                             tail.longitude = longi
                             do {
