@@ -12,8 +12,6 @@ import Foundation
 struct MapNavigationView: View {
     @State private var path = NavigationPath()
     @Environment(\.modelContext) private var context
-    
-    @Environment(\.dismiss) private var dismiss
     var body: some View {
         NavigationStack(path: $path) {
             MapView(path: $path)
@@ -22,13 +20,6 @@ struct MapNavigationView: View {
                 }
                 .navigationTitle("Map")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Back") {
-                            dismiss()
-                        }
-                    }
-                }
         }
     }
 }

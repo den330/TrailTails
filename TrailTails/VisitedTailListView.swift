@@ -13,19 +13,25 @@ struct VisitedTailListView: View {
     @State private var path = NavigationPath()
     
     var body: some View {
-        NavigationStack(path: $path) {
-            List {
-                ForEach(tails) { tail in
-                    Text(tail.title)
-                        .onTapGesture {
-                            path.append(tail.id)
+        Group {
+            if !tails.isEmpty {
+                NavigationStack(path: $path) {
+                    List {
+                        ForEach(tails) { tail in
+                            Text(tail.title)
+                                .onTapGesture {
+                                    path.append(tail.id)
+                                }
                         }
+                    }
+                    .padding()
+                    .navigationTitle("Visited Tails")
+                    .navigationDestination(for: Int.self) { id in
+                        StoryDetailView(path: $path, storyId: id)
+                    }
                 }
-            }
-            .padding()
-            .navigationTitle("Visited Tails")
-            .navigationDestination(for: Int.self) { id in
-                StoryDetailView(path: $path, storyId: id)
+            } else {
+                Text("You have not visited any tail yet.")
             }
         }
     }
