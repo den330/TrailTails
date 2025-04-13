@@ -2,7 +2,7 @@ import SwiftData
 import Foundation
 
 @Model
-final class Tail {
+final class Tail: Identifiable {
     @Attribute(.unique) var id: Int
     var title: String
     var summaries: [Summary]

@@ -16,7 +16,7 @@ struct ContentView: View {
     var body: some View {
         HomeView(showMap: $showMap)
             .fullScreenCover(isPresented: $showMap) {
-                MapNavigationView()
+                TailTabView()
             }
     }
 }

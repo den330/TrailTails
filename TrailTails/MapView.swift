@@ -43,9 +43,7 @@ struct MapView: View {
                                     VStack(spacing: 4) {
                                         if tailToPop.contains(tail.id) {
                                             Button {
-                                                print("before: \(path.count)")
                                                 path.append(Int(tail.id))
-                                                print("after: \(path.count)")
                                             } label: {
                                                 Text("Open this story")
                                                     .font(.caption)
