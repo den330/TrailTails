@@ -17,6 +17,7 @@ struct MapView: View {
     @State private var cameraPosition: MapCameraPosition?
     @State private var showLocationDeniedAlert: Bool = false
     @State private var tailToPop = Set<Int>()
+    @State private var scale: CGFloat = 0.5
     @Binding var path: NavigationPath
     
     private func detectAuthAndShowAlert(auth: LocationManager.LocationAuthStatus?) {
@@ -64,23 +65,27 @@ struct MapView: View {
                     }
                     Button {
                         Task {
-                            self.detectAuthAndShowAlert(auth: locationManager.locationAuthStatus)
-                            self.cameraPosition = nil
-                            if tails.filter({$0.visited == false}).count >= 15 {
-                                for tail in tails {
-                                    if !tail.visited {
-                                        context.delete(tail)
+                            do {
+                                self.detectAuthAndShowAlert(auth: locationManager.locationAuthStatus)
+                                self.cameraPosition = nil
+                                if tails.filter({$0.visited == false}).count >= 15 {
+                                    for tail in tails {
+                                        if !tail.visited {
+                                            context.delete(tail)
+                                        }
                                     }
+                                    try context.save()
+                                }
+                                let currentList = tails.map {$0.id}
+                                let fetchedTails = try await NetworkService.fetchTails(idList: Tail.randomIdGenerator(currentList: currentList))
+                                for tail in fetchedTails {
+                                    context.insert(tail)
                                 }
                                 try context.save()
+                                self.startingSpotDetermined = false
+                            } catch {
+                                print("fetch or save error \(error)")
                             }
-                            let currentList = tails.map {$0.id}
-                            let fetchedTails = try await NetworkService.fetchTails(idList: Tail.randomIdGenerator(currentList: currentList))
-                            for tail in fetchedTails {
-                                context.insert(tail)
-                            }
-                            try context.save()
-                            self.startingSpotDetermined = false
                         }
                     } label: {
                         Text("Get some tails")
@@ -89,6 +94,12 @@ struct MapView: View {
                             .clipShape(.rect(cornerRadius: 80))
                     }
                     .padding([.top, .leading], 10)
+                    .scaleEffect(scale)
+                    .onAppear {
+                        withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                            scale = 1.2
+                        }
+                    }
                 }
             } else {
                 ProgressView()
