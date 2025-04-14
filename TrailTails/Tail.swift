@@ -20,7 +20,7 @@ final class Tail: Identifiable {
     
     static func randomIdGenerator(currentList: [Int]) -> [Int] {
         let range = 1..<60000
-        let numOfIdRequired = 5
+        let numOfIdRequired = 3
         var res = [Int]()
         while true {
             if res.count == numOfIdRequired {

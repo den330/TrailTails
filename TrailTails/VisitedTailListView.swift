@@ -11,6 +11,7 @@ import SwiftData
 struct VisitedTailListView: View {
     @Query(filter: #Predicate<Tail> { $0.visited }) private var tails: [Tail]
     @State private var path = NavigationPath()
+    @Environment(\.modelContext) private var context
     
     var body: some View {
         Group {
@@ -18,11 +19,18 @@ struct VisitedTailListView: View {
                 NavigationStack(path: $path) {
                     List {
                         ForEach(tails) { tail in
-                            Text(tail.title)
-                                .onTapGesture {
-                                    path.append(tail.id)
-                                }
+                            HStack {
+                                Text(tail.title)
+                                    .onTapGesture {
+                                        path.append(tail.id)
+                                    }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundStyle(.gray)
+                                    .font(.system(size: 14))
+                            }
                         }
+                        .onDelete(perform: deleteTails)
                     }
                     .padding()
                     .navigationTitle("Visited Tails")
@@ -33,6 +41,18 @@ struct VisitedTailListView: View {
             } else {
                 Text("You have not visited any tail yet.")
             }
+        }
+    }
+    
+    private func deleteTails(at offsets: IndexSet) {
+        for index in offsets {
+            context.delete(tails[index])
+        }
+        
+        do {
+            try context.save()
+        } catch {
+            print("Failed to delete tail: \(error)")
         }
     }
 }

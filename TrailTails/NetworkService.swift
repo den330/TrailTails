@@ -25,6 +25,7 @@ class NetworkService {
         guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
             throw NetworkError.networkError
         }
+        print("response came back")
         let decoder = JSONDecoder()
         let tails = try decoder.decode(TailListDTO.self, from: data)
         var tailArr: [Tail] = []
