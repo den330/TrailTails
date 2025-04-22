@@ -21,13 +21,13 @@ struct VisitedTailListView: View {
                         ForEach(tails) { tail in
                             HStack {
                                 Text(tail.title)
-                                    .onTapGesture {
-                                        path.append(tail.id)
-                                    }
                                 Spacer()
                                 Image(systemName: "chevron.right")
                                     .foregroundStyle(.gray)
                                     .font(.system(size: 14))
+                            }
+                            .onTapGesture {
+                                path.append(tail.id)
                             }
                         }
                         .onDelete(perform: deleteTails)

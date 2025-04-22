@@ -15,23 +15,33 @@ struct StoryDetailView: View {
     let storyId: Int
     var body: some View {
         ScrollView {
-            if let tail = tails.filter ({$0.id == storyId}).first {
-                Text(tail.title)
-                    .font(.largeTitle)
+            VStack(alignment: .center, spacing: 10) {
+                if let tail = tails.filter ({$0.id == storyId}).first {
+                    Text(tail.title)
+                        .font(.largeTitle)
+                }
+                Divider()
+                if let summary = tails.filter ({$0.id == storyId}).first?.summaries.first {
+                    Text(summary.text)
+                        .font(.body)
+                }
             }
-            if let summary = tails.filter ({$0.id == storyId}).first?.summaries.first {
-                Spacer(minLength: 10)
-                Text(summary.text)
-                    .font(.body)
-            }
+            .padding()
+            .background(
+                Color(.systemBackground).opacity(0.7)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+            )
         }
         .padding(20)
+        .foregroundStyle(.primary)
         .background {
             Image("basketball")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
-            Color.black.opacity(0.5).edgesIgnoringSafeArea(.all)
+
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
         }
         .navigationBarBackButtonHidden(true)
         .navigationTitle("Story Details")

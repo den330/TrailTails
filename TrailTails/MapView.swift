@@ -21,7 +21,8 @@ struct MapView: View {
     @State private var showLocationDeniedAlert: Bool = false
     @State private var tailToPop = Set<Int>()
     @State private var scale: CGFloat = 1
-    @State private var assignInProgress: Bool = false
+    @State private var safetyAlertShouldShow = false
+    @State private var networkError: String?
     @Binding var path: NavigationPath
     @Environment(\.dismiss) private var dismiss
 
@@ -31,6 +32,7 @@ struct MapView: View {
             case .denied:
                 showLocationDeniedAlert = true
             default:
+                locationManager.startUpdatingLocation()
                 break
             }
         }
@@ -86,8 +88,9 @@ struct MapView: View {
                                 }
                                 try context.save()
                                 self.startingSpotDetermined = false
+                                handleLocationUpdate()
                             } catch {
-                                print("fetch or save error \(error)")
+                                networkError = error.localizedDescription
                             }
                         }
                     } label: {
@@ -112,6 +115,7 @@ struct MapView: View {
             }
         }
         .onChange(of: locationManager.location) {
+            self.safetyAlertShouldShow = !UserDefaults.standard.safetyAlertShown
             handleLocationUpdate()
         }
         .onChange(of: locationManager.locationAuthStatus) {
@@ -119,6 +123,9 @@ struct MapView: View {
         }
         .onAppear {
             self.detectAuthAndShowAlert(auth: locationManager.locationAuthStatus)
+        }
+        .onDisappear {
+            self.locationManager.stopUpdatingLocation()
         }
         .alert("Location Access Denied", isPresented: $showLocationDeniedAlert) {
             Button("Cancel", role: .cancel) {
@@ -132,37 +139,68 @@ struct MapView: View {
         } message: {
             Text("TrailTails needs your location to find and unlock stories near you.")
         }
+        .alert("Be mindful", isPresented: $safetyAlertShouldShow) {
+            Button("I understand", role: .cancel) {
+                UserDefaults.standard.safetyAlertShown = true
+            }
+        } message: {
+            Text("Please be mindful of your surroundings and avoid dangerous locations while unlocking stories with Trail Tails.")
+        }
+        .alert("Network Error", isPresented: Binding(
+            get: { networkError != nil },
+            set: {_ in networkError = nil }
+        )) {
+            Button("OK", role: .cancel) {
+                dismiss()
+            }
+        } message: {
+            Text("\(networkError ?? "")")
+        }
     }
     
     private func handleLocationUpdate() {
         if let userCoord = locationManager.location?.coordinate {
-            if !startingSpotDetermined && !assignInProgress {
-                self.assignInProgress = true
-                for tail in unAssignedTails {
-                    let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance:1)
-                    tail.latitude = lat
-                    tail.longitude = longi
-                }
-                do {
-                    try context.save()
-                } catch {
-                    print("Tail coord save fail \(error)")
-                }
-                cameraPosition = MapCameraPosition.camera(.init(centerCoordinate: userCoord, distance: 2000))
+            if !startingSpotDetermined {
+                assignCoord(userCoord: userCoord)
+                cameraPosition = MapCameraPosition.camera(.init(centerCoordinate: userCoord, distance: 8000))
                 startingSpotDetermined = true
-                self.assignInProgress = false
-            } else {
-                for tail in tails {
-                    if let lat = tail.latitude, let longi = tail.longitude {
-                        let tailLocation = CLLocation(latitude: lat, longitude: longi)
-                        if tailLocation.distance(from: CLLocation(latitude: userCoord.latitude, longitude: userCoord.longitude)) < 300 {
-                            tailToPop.insert(tail.id)
-                        } else {
-                            tailToPop.remove(tail.id)
-                        }
+            }
+            for tail in tails {
+                if let lat = tail.latitude, let longi = tail.longitude {
+                    let tailLocation = CLLocation(latitude: lat, longitude: longi)
+                    if tailLocation.distance(from: CLLocation(latitude: userCoord.latitude, longitude: userCoord.longitude)) < 300 {
+                        tailToPop.insert(tail.id)
+                    } else {
+                        tailToPop.remove(tail.id)
                     }
                 }
             }
+        }
+    }
+    
+    private func assignCoord(userCoord: CLLocationCoordinate2D) {
+        for tail in unAssignedTails {
+            let (lat, longi) = LocationService.randomCoordinate(near: userCoord, maxDistance:1)
+            tail.latitude = lat
+            tail.longitude = longi
+        }
+        print("coord assigned")
+        do {
+            try context.save()
+        } catch {
+            print("Tail coord save fail \(error)")
+        }
+    }
+}
+
+extension UserDefaults {
+    private static let safetyAlertShownKey = "safetyAlertShown"
+    var safetyAlertShown: Bool {
+        get {
+            bool(forKey: Self.safetyAlertShownKey)
+        }
+        set {
+            set(newValue, forKey: Self.safetyAlertShownKey)
         }
     }
 }
